@@ -1,0 +1,430 @@
+---
+title: 'UK Road Safety: Traffic Accidents (2005-2017)'
+author: "Nadya"
+date: "30/08/2020"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 1
+    toc_float: true
+    code_folding: "show"
+    df_print: paged
+    theme: "paper"
+    highlight: "pygments"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# **1. Explanation** {.tabset}
+## 1.1. Brief 
+
+Welcome!
+
+For this EDA, this research will use UK Road Safety: Traffic Accidents (2005-2017).
+
+reference: https://www.kaggle.com/tsiaras/uk-road-safety-accidents-and-vehicles
+
+## 1.2. Data's Point of View 
+
+These files provide detailed road safety data about the circumstances of personal injury road accidents in GB from 1979, the types of vehicles involved and the consequential casualties. The statistics relate only to personal injury accidents on public roads that are reported to the police, and subsequently recorded, using the STATS19 accident reporting form.
+
+<P>
+
+# **2. Data Inspection** {.tabset}
+
+## Library
+```{r message=FALSE, error=FALSE, warning=FALSE}
+library("lubridate")
+library("dplyr")
+```
+
+
+## Data source:
+```{r data}
+traffic<-read.csv("Accident_Information.csv")
+```
+
+## First 6 data
+```{r data head}
+head(traffic)
+```
+
+
+## last 6 data
+```{r data tail}
+tail(traffic)
+```
+
+
+## Data dimension
+```{r data dim}
+dim(traffic)
+```
+
+
+## Column Names
+```{r data colnames}
+names(traffic)
+```
+
+
+# **3. Data Cleansing & Coercion** {.tabset}
+
+## check variable type
+```{r data variable}
+str(traffic)
+```
+
+## 3.1 Data Coertion {.tabset}
+
+### Change to Factor/ Categorical
+```{r data coertion to factor}
+traffic$X1st_Road_Class <- as.factor(traffic$X1st_Road_Class)
+traffic$X1st_Road_Number <- as.factor(traffic$X1st_Road_Number)
+traffic$X2nd_Road_Class <- as.factor(traffic$X2nd_Road_Class)
+traffic$X2nd_Road_Number <- as.factor(traffic$X2nd_Road_Number)
+traffic$Accident_Severity <- as.factor(traffic$Accident_Severity)
+traffic$Carriageway_Hazards <- as.factor(traffic$Carriageway_Hazards)
+traffic$Day_of_Week <- as.factor(traffic$Day_of_Week)
+traffic$Did_Police_Officer_Attend_Scene_of_Accident <- as.factor(traffic$Did_Police_Officer_Attend_Scene_of_Accident)
+traffic$Junction_Control <- as.factor(traffic$Junction_Control)
+traffic$Junction_Detail <- as.factor(traffic$Junction_Detail)
+traffic$Light_Conditions <- as.factor(traffic$Light_Conditions)
+traffic$Local_Authority_.District. <- as.factor(traffic$Local_Authority_.District.)
+traffic$Local_Authority_.Highway. <- as.factor(traffic$Local_Authority_.Highway.)
+traffic$Location_Easting_OSGR <- as.factor(traffic$Location_Easting_OSGR)
+traffic$Location_Northing_OSGR <- as.factor(traffic$Location_Northing_OSGR)
+traffic$LSOA_of_Accident_Location <- as.factor(traffic$LSOA_of_Accident_Location)
+traffic$Police_Force <- as.factor(traffic$Police_Force)
+traffic$Road_Surface_Conditions <- as.factor(traffic$Road_Surface_Conditions)
+traffic$Road_Type <- as.factor(traffic$Road_Type)
+traffic$Special_Conditions_at_Site <- as.factor(traffic$Special_Conditions_at_Site)
+traffic$Speed_limit <- as.factor(traffic$Speed_limit)
+traffic$Urban_or_Rural_Area <- as.factor(traffic$Urban_or_Rural_Area)
+traffic$Weather_Conditions <- as.factor(traffic$Weather_Conditions)
+traffic$InScotland <- as.factor(traffic$InScotland)
+
+```
+
+
+### Change to Date
+```{r message=FALSE, error=FALSE, warning=FALSE}
+
+traffic$Date <- ymd(traffic$Date)
+traffic$Time <- hm(traffic$Time)
+
+```
+
+### Check variable type again
+```{r data variable 2}
+glimpse(traffic)
+```
+
+```{r}
+traffic
+```
+
+
+## 3.2 Missing Value {.tabset}
+
+### Showed any column that has `NULL` values
+```{r}
+colSums(is.na(traffic))
+```
+
+
+### Remove Column that Unrelated to This Research
+```{r}
+traffic <- subset(traffic, select = -c(X1st_Road_Class, 
+                                       X1st_Road_Number, 
+                                       X2nd_Road_Class, 
+                                       X2nd_Road_Number, 
+                                       Location_Easting_OSGR, 
+                                       Location_Northing_OSGR))
+```
+
+
+### Remove Row that has NA value
+
+```{r}
+traffic <- na.omit(traffic, cols = c("Did_Police_Officer_Attend_Scene_of_Accident", 
+                                     "Longitude", "Pedestrian_Crossing.Human_Control", 
+                                     "Pedestrian_Crossing.Physical_Facilities", 
+                                     "Speed_limit", 
+                                     "InScotland"))
+```
+
+
+### Check The Table Again
+
+```{r}
+traffic
+```
+
+
+
+# **4. Data Explanation** {.tabset}
+
+## 4.1. Brief Explanation
+
+```{r data summary}
+glimpse(traffic)
+```
+
+
+## 4.2 Summary {.tabset}
+
+### 4.2.1. Highest Category in Each Variable {.tabset}
+
+#### A: Accident Severity
+
+```{r}
+traffic %>% 
+  count(Accident_Severity, sort = TRUE)
+```
+
+
+#### B: Junction Control
+
+```{r}
+traffic %>% 
+  count(Junction_Control, sort = TRUE)
+```
+
+
+#### C: Junction Detail
+
+```{r}
+traffic %>% 
+  count(Junction_Detail, sort = TRUE) %>% 
+  head(10)
+```
+
+
+#### D: Urban/Rural Area
+
+```{r}
+traffic %>% 
+  count(Urban_or_Rural_Area, sort = TRUE)
+```
+
+
+#### E: Road Type
+
+```{r}
+traffic %>% 
+  count(Road_Type, sort = TRUE)
+```
+
+
+#### F: Road Survey COndition
+
+```{r}
+traffic %>% 
+  count(Road_Surface_Conditions, sort = TRUE)
+```
+
+
+#### G: Speed Limit
+
+```{r}
+traffic %>% 
+  count(Speed_limit, sort = TRUE)
+```
+
+
+#### H: Weather Condition
+
+```{r}
+traffic %>% 
+  count(Weather_Conditions, sort = TRUE)
+```
+
+
+
+#### F: Light Condition
+
+```{r}
+traffic %>% 
+  count(Light_Conditions, sort = TRUE)
+```
+
+
+
+#### G: Year
+
+```{r}
+traffic %>% 
+  count(Year, sort = TRUE)
+```
+
+
+
+
+
+### 4.2.2. Highest number of Accident Based on Accident Severity {.tabset}
+
+#### A: Year
+
+```{r}
+traffic %>% 
+  count(Accident_Severity, Year, sort = TRUE)
+```
+
+
+#### B: Day of Week
+
+
+```{r}
+traffic %>% 
+  count(Accident_Severity, Day_of_Week, sort = TRUE)
+```
+
+
+#### C: Local Authority
+
+```{r}
+traffic %>% 
+  count(Accident_Severity, Local_Authority_.District., sort = TRUE)
+```
+
+
+#### D: Light Condition
+
+```{r}
+traffic %>% 
+  count(Accident_Severity, Light_Conditions, sort = TRUE)
+```
+
+
+
+#### E: Speed Limit
+
+```{r}
+traffic %>% 
+  count(Accident_Severity, Speed_limit, sort = TRUE)
+```
+
+
+
+#### F: Road Type
+
+```{r}
+traffic %>% 
+  count(Accident_Severity, Road_Type, sort = TRUE)
+```
+
+
+
+#### G: Junction Control
+
+```{r}
+traffic %>% 
+  count(Accident_Severity, Junction_Control, sort = TRUE)
+```
+
+
+#### H: Junction Detail
+
+```{r}
+traffic %>% 
+  count(Accident_Severity, Junction_Detail, sort = TRUE)
+```
+
+
+
+
+# **5. Data Insight** {.tabset}
+
+## CASE 1
+
+<h3>TOP 5 THE CAUSE OF ACCIDENT</h3>
+
+```{r}
+traffic %>% 
+  filter(Accident_Severity == "Fatal") %>% 
+  filter(Junction_Control != "Data missing or out of range") %>% 
+  group_by(Urban_or_Rural_Area, Light_Conditions, Junction_Control, Junction_Detail) %>% 
+  count(sort = TRUE) %>% 
+  head(5)
+```
+
+<h4>_Fatal Accident mostly happens in Urban area when sun still shines. T or Staggered Junctions with uncontrolled by the police are common place to have an accident_</h4>
+
+
+## CASE 2
+
+<h3>IS SCOTLAND MORE DANGEROUS?</h3>
+
+```{r}
+traffic %>% 
+  filter(Accident_Severity == "Fatal") %>%
+  group_by(InScotland) %>% 
+  count(sort = TRUE) %>% 
+  head(5)
+```
+
+<h4>_Scotland's number of Fatal accident is almost a 1/10 than Outside them_</h4>
+
+
+## CASE 3
+
+<h3>TOP 5 OF ROAD TYPE AND ROAD SURFACE CONDITIONS WITH FATAL ACCIDENT</h3>
+
+```{r}
+traffic %>% 
+  filter(Accident_Severity == "Fatal") %>% 
+  group_by(Accident_Severity, Road_Type, Road_Surface_Conditions) %>% 
+  count(sort = TRUE) %>% 
+  head(5)
+```
+
+<h4>_Single Carriageway with Dry surface is mainly have a Fatal Accident_</h4>
+
+
+
+## CASE 4
+
+<h3>TOP 5 OF WEATHER CONDITIONS, LIGHT CONDITIONS AND SPEED LIMIT WITH FATAL ACCIDENT</h3>
+
+
+```{r}
+traffic %>% 
+  group_by(Accident_Severity = "Fatal", Weather_Conditions, Light_Conditions, Speed_limit) %>% 
+  count(sort = TRUE) %>% 
+  head(5)
+```
+
+<h4>_A broad day with fine no high winds weather is most likely have Fatal Accident_</h4>
+
+
+## CASE 5
+
+<h3>TOP 5 DAYS OF FATAL ACCIDENT</h3>
+
+```{r}
+traffic %>% 
+  filter(Accident_Severity == "Fatal") %>% 
+  group_by(Day_of_Week) %>% 
+  count(sort = TRUE) %>% 
+  head(5)
+```
+
+<h4>_Fatal Accident most likely happens on Weekend_</h4>
+
+
+## CASE 6
+
+<h3>TOP 5 LOCAL AUTHORITY & POLICE FORCE THAT MANAGE FATAL ACCIDENT</h3>
+
+```{r}
+traffic %>% 
+  filter(Accident_Severity == "Fatal") %>% 
+  group_by(Local_Authority_.District., Police_Force) %>% 
+  count(sort = TRUE) %>% 
+  head(5)
+```
+
+<h4>_City of Birmingham under West Midlands Police Force handle the most accident from 2005 - 2017_</h4>
